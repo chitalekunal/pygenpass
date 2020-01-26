@@ -22,48 +22,124 @@ SOFTWARE.
 
 import sqlite3  # library for database
 
-
 class DatabaseConnection:
     """ Class of database entries for user's information."""
 
-    def __init__(self):
+    def __create_table__(self,structure):
+        """
+        Create table structure
+        {
+            "tablename":"passwords",
+            field_name1:
+            {
+                "datatype": "<INTEGER,REAL,TEXT,BLOB<NONE>",
+                "nullablity" : "true",
+                "unique_index" : "true",
+                "primary_key" : "true",
+
+            },
+            field_name2:
+            {
+                "datatype": "<INTEGER,REAL,TEXT,BLOB<NONE>",
+                "nullablity" : "true",
+                "unique_index" : "true",
+                "primary_key" : "true",
+            },
+            .
+            .
+            .
+        }
+        """
+        create_sql = "CREATE TABLE IF NOT EXISTS "
+        for key_level1 in structure:
+            if key_level1 == 'tablename':
+                create_sql = create_sql+structure["tablename"]+"(\n"
+            else:
+                for key_level2 in structure[key_level1]:
+                    #Add more constrains as per requirements
+                    if [key_level2] == "nullablity":
+                        create_sql=create_sql+" NOT NULL "
+                    elif [key_level2] == "unique_index":
+                        create_sql=create_sql+" UNIQUE "
+                    elif [key_level2] == "primary_key":
+                        create_sql=create_sql+" PRIMARY KEY "
+                create_sql=create_sql+",\n"
+        create_sql=create_sql+");"
+
+        """self.cursor_obj.execute(
+            CREATE TABLE IF NOT EXISTS passwords
+    		  (id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar,
+    		  creation_date varchar, email varchar, portal_url varchar)
+    		
+        )"""
+        self.cursor_obj.execute(create_sql)
+        self.con.commit()
+
+
+    def __init__(self,structure):
         """Used to create database and then to connect with generated databse file
         Checked for table is created? if not then created as per required values """
         self.con = sqlite3.connect("generated_password.db")
         self.cursor_obj = self.con.cursor()
-        self.cursor_obj.execute(
-            """CREATE TABLE IF NOT EXISTS passwords
-    		  (id integer PRIMARY KEY,portal_name text NOT NULL UNIQUE, password varchar,
-    		  creation_date varchar, email varchar, portal_url varchar)
-    		"""
-        )
+        self.__create_table__(structure)
+
+    def insert_data(self, structure): 
+        """Adding values into database
+        A dict structure is accepted as input parameter having format as below
+        {
+            "tablename" : "passwords",
+            "field_name" : "value",
+            .
+            .
+            .
+        }
+        """
+
+        insert_data_string="INSERT INTO "+structure["tablename"]+"( "+','.join([key for key in structure if key != "tablename" ])+") VALUES ("+','.join([structure[key] for key in structure if key != "tablename" ])+")"
+        self.cursor_obj.execute(insert_data_string)
         self.con.commit()
 
-    def insert_data(self, portal_name, password, creation_date, email, portal_url):
-        """Adding values into database"""
-        self.password = password
-        self.creation_date = creation_date
-        self.email = email
-        self.portal_name = portal_name
-        self.portal_url = portal_url
-        self.cursor_obj.execute(
-            """INSERT INTO passwords
-            (portal_name, password, creation_date, email, portal_url)
-            VALUES (?, ?, ?, ?, ?)""",
-            (self.portal_name, self.password, self.creation_date, self.email, self.portal_url,),
-        )
-        self.con.commit()
-
-    def delete_data(self, portal_name):
-        """Deleting values from database"""
-        self.portal_name = portal_name
-        self.cursor_obj.execute(
-            """DELETE from passwords where portal_name = ?""", (self.portal_name,)
-        )
+    def delete_data(self, structure):
+        """
+        Deleting values from database
+        A dict structure is accepted as input parameter having format as below
+        {
+            "tablename":"passwords",
+            "field_name":"value_to_delete",
+            .
+            .
+            .
+        }
+        """
+        delete_data_string="DELETE from "+structure["tablename"]+" where "+' and '.join([key+"="structure[key] for key in structure if key != "tablename"])
+        self.cursor_obj.execute(delete_data_string)
         self.con.commit()
 
     def update_data(self, portal_name, password):
-        """Updating values in database"""
+        """
+        Updating values in database
+        A dict structure is accepted as input parameter having format as below
+        {
+            "tablename":"passwords",
+            "change_value":{
+                "field_name":"value_to_set",
+                "field_name1":"value_to_set1",
+                .
+                .
+                .
+\            }
+            "condition":{
+                "field_name":"value_to_delete",
+                .
+                .
+                .
+            }
+        }
+
+        """
+        delete_data_string="UPDATE "+structure["tablename"]+" SET "+','.join([key+"="structure[key] for key in structure["change_value"] ])
+        self.cursor_obj.execute(delete_data_string)
+        
         self.portal_name = portal_name
         self.password = password
         self.cursor_obj.execute(
