@@ -69,6 +69,17 @@ class DatabaseConnection:
     		    creation_date varchar, email varchar, portal_url varchar)
     		    """
             )
+            self.cursor_obj.execute(
+                """CREATE TABLE IF NOT EXISTS passwords_preference
+    		    (
+                passwords_id integer PRIMARY KEY,
+                permitted_alpha varchar(26), 
+                permitted_special_char varchar(32),
+                permitted_numbers FLOAT,
+                permitted_length INTEGER,
+                )
+    		    """
+            )
         self.con.commit()
 
     def insert_data(self, portal_name=None, password=None, creation_date=None, email=None, portal_url=None,insert_record=None):
