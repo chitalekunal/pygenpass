@@ -115,3 +115,19 @@ def showpass():
         print("No records found")
     else:
         print(spass)
+
+        
+@click.command(help="Accept number, special characters")
+def charchoice():
+    permitted_characters = click.prompt("Alphabets to use",default="None")
+    permitted_special_characters = click.prompt("Special characters to use",default="None")
+    permitted_numbers = click.prompt("Permitted Numbers",default="None")
+    password_length = click.prompt("Default Password Length",default="None")
+    payload={
+        "tablename":"passwords_preference",
+        "permitted_alpha":permitted_characters,
+        "permitted_special_char":permitted_special_characters,
+        "permitted_length":password_length,
+        "permitted_numbers":permitted_numbers
+    }
+    db_obj,insert_data(insert_record=payload)

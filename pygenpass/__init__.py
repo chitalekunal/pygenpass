@@ -28,6 +28,7 @@ from pygenpass.password import delpass
 from pygenpass.password import version
 from pygenpass.password import modpass
 from pygenpass.password import allpass
+from pygenpass.password import charchoice
 
 
 @click.group()
@@ -42,6 +43,7 @@ main.add_command(showpass)
 main.add_command(savepass)
 main.add_command(delpass)
 main.add_command(version)
+main.add_command(charchoice)
 
 if __name__ == "__main__":
     main()
